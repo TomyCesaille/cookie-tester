@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang=en>
+
+<head>
+    <meta charset=utf-8>
+    <title>Cookie Tester</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+</head>
+
+<body>
+    <h1>Cookie Tester</h1>
+    <p>Cookie Tester is an utility website that helps verifying cookies retention in the browser.</p>
+
+    <h2>Add a cookie</h2>
+    <form id="add-cookie-form">
+        <label for="add-cookie-form-name">Cookie name</label>
+        <input id="add-cookie-form-name" name="name" placeholder="cookie-name">
+        <label for="add-cookie-form-value">Cookie value</label>
+        <textarea id="add-cookie-form-value" name="value" placeholder="cookie-value"></textarea>
+        <label for=" add-cookie-form-expires">Cookie expires (days)</label>
+        <input id="add-cookie-form-expires" type="number" name="expires" min="1" placeholder="7" value="7">
+        <input id="add-cookie-form-submit" type="submit" value="Submit" onclick="addCookie(event)">
+    </form>
+
+    <h2>Cookies registered</h2>
+    <p><b id="cookies-count">0</b> cookie(s) registered on this website.</p>
+    <input id="clear-cookies" type="button" value="Clear cookies" onclick="clearCookies()">
+    <table id="cookies-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody id="cookies-table-tbody">
+        </tbody>
+    </table>
+
+    <h2>API and Lazy usage</h2>
+    <p>GET <a id="api-example-a"><code><span id="api-example-text"></span></code></a> to
+        add a new cookie.
+    </p>
+
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
+
+    <script type="text/javascript">
+        function addCookie(event) {
+            if (event != null) {
+                event.preventDefault();
+            }
+
+            var name = document.getElementById("add-cookie-form-name").value;
+            var value = document.getElementById("add-cookie-form-value").value;
+            var expires = document.getElementById("add-cookie-form-expires").value;
+            Cookies.set(name, value, { expires: Number(expires), path: '' });
+            loadCookiesTable();
+            preFillForm();
+        }
+        function clearCookies() {
+            var cookies = Cookies.get();
+            Object.keys(cookies).forEach(function (key) {
+                Cookies.remove(key);
+            });
+            loadCookiesTable();
+        }
+        function loadCookiesTable() {
+            var tbody = document.getElementById("cookies-table-tbody");
+            tbody.innerHTML = "";
+            var cookies = Cookies.get();
+            Object.keys(cookies).forEach(function (key) {
+                var tr = tbody.insertRow();
+                var td = tr.insertCell();
+                td.innerText = key;
+                td = tr.insertCell();
+                td.innerText = cookies[key];
+            })
+
+            var counter = document.getElementById("cookies-count");
+            counter.textContent = Object.keys(cookies).length;
+        }
+        function preFillForm() {
+            document.getElementById("add-cookie-form-name").value = Math.round(new Date().getTime());
+            var text = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            document.getElementById("add-cookie-form-value").textContent = text;
+        }
+        function handleUrlParameters() {
+            var queryString = window.location.search;
+            console.log(queryString)
+            if (queryString != null) {
+                var urlParams = new URLSearchParams(queryString);
+
+                document.getElementById("add-cookie-form-name").value = urlParams.get('name');
+                document.getElementById("add-cookie-form-value").textContent = urlParams.get('value');
+                document.getElementById("add-cookie-form-expires").textContent = urlParams.get('expires');
+                addCookie(null);
+            }
+        }
+    </script>
+
+    <script>loadCookiesTable();</script>
+    <script>preFillForm();</script>
+    <script>handleUrlParameters();</script>
+    <script>
+        var getUrl = window.location;
+        var baseUrl = getUrl.protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1];
+        var example = baseUrl + "?name=foo&value=bar&expires=7";
+        document.getElementById("api-example-text").textContent = example;
+        document.getElementById("api-example-a").setAttribute("href", example);
+    </script>
+</body>
+
+</html>
